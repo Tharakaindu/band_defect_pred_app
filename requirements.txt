@@ -1,4 +1,4 @@
 lime
 scikit-plot
 streamlit
-scipy
+scipy==1.11.4
