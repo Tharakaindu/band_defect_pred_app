@@ -14,7 +14,7 @@ import scikitplot as skplt
 from lime import lime_tabular
 
 ## Load Data
-file_path = '/content/drive/MyDrive/CWD Band Quality Prediction/Band Data/Band Data 8X15 Only - Selected data.csv'
+file_path = 'Band Data 8X15 Only - Selected data.csv'
 df = pd.read_csv(file_path)
 
 feature_names = df.columns.tolist()
