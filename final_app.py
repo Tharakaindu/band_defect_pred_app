@@ -79,10 +79,10 @@ y_pred = np.where(probability_predictions[:, 1] > threshold, "Welding_Crack", "G
 Y_test_preds = gbc_classif.predict(X_test)
 
 # Plot the confusion matrix
-#conf_mat_fig = plt.figure(figsize=(6, 6))
-#ax1 = conf_mat_fig.add_subplot(111)
-#skplt.metrics.plot_confusion_matrix(Y_test, y_pred, ax=ax1, normalize=True, cmap='viridis')
-#st.pyplot(conf_mat_fig, use_container_width=True)
+conf_mat_fig = plt.figure(figsize=(6, 6))
+ax1 = conf_mat_fig.add_subplot(111)
+skplt.metrics.plot_confusion_matrix(Y_test, y_pred, ax=ax1, normalize=True, cmap='viridis')
+st.pyplot(conf_mat_fig, use_container_width=True)
 
 ## Dashboard
 st.title("Band Defects :red[Prediction] :bar_chart: :chart_with_upwards_trend:")
