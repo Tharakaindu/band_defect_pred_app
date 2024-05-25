@@ -1,7 +1,7 @@
 lime
 scikit-plot
-streamlit
 scipy==1.11.4
 scikit-learn==1.2.2
 scikit-plot
 uv
+streamlit
