@@ -81,7 +81,7 @@ Y_test_preds = gbc_classif.predict(X_test)
 # Plot the confusion matrix
 conf_mat_fig = plt.figure(figsize=(6, 6))
 ax1 = conf_mat_fig.add_subplot(111)
-skplt.metrics.plot_confusion_matrix(Y_test, y_pred, ax=ax1, normalize=True, cmap='viridis')
+skplt.metrics.plot_confusion_matrix(Y_test, y_pred, ax=ax1, normalize=True)
 st.pyplot(conf_mat_fig, use_container_width=True)
 
 ## Dashboard
