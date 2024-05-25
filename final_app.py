@@ -26,22 +26,63 @@ targets = df["iDefect"].values
 
 target_names = df["iDefect"].unique()
 
+# Option 1: Check and handle missing values in targets
+# if np.isnan(targets).any():
+#     # Handle missing values in targets (e.g., remove rows with missing targets)
+#     targets = targets.dropna()
+
+# Option 2: Drop rows with missing values together
+data_with_targets = pd.concat([df[feature_names], df["iDefect"]], axis=1)
+data_with_targets = data_with_targets.dropna(axis=0)
+
+data = data_with_targets[feature_names]
+targets = data_with_targets["iDefect"]
+
+# ... rest of your code for splitting data, training model, etc.
+
 # Split data into train and test sets (consider handling missing values if necessary)
 X_train, X_test, Y_train, Y_test = train_test_split(data.dropna(), targets, train_size=0.8, random_state=123)
 
-
 ## Load Model
-rf_classif = load("Welding_crack_gbc.joblib")
+gbc_classif = load("Welding_crack_gbc.joblib")
 
 # Prediction with error handling (optional, data cleaning is preferred)
 try:
-  Y_test_preds = rf_classif.predict(X_test)
+  Y_test_preds = gbc_classif.predict(X_test)
 except ValueError as e:
   if 'could not convert string to float' in str(e):
     print("Encountered string values during prediction. Consider data cleaning.")
     # ... (consider alternative actions, e.g., remove rows, log the error)
   else:
     raise e  # Re-raise other ValueErrors
+
+from sklearn.preprocessing import LabelEncoder
+
+# Identify and handle non-numeric features (replace with your approach)
+le = LabelEncoder()
+for col in X_test.columns:
+  if X_test[col].dtype == object:  # Check for string data type
+    X_test[col] = le.fit_transform(X_test[col])
+
+# Now predict using the cleaned data
+Y_test_preds = gbc_classif.predict(X_test)
+
+probability_predictions = gbc_classif.predict_proba(X_test)
+
+# Apply a threshold to convert probabilities to class labels
+threshold = 0.5
+y_pred = np.where(probability_predictions[:, 1] > threshold, "Welding_Crack", "Good")  # Assuming second column is positive class
+
+# Assuming you have trained your model (rf_classif) and split data (X_test, Y_test)
+
+# Predict labels for test data
+Y_test_preds = gbc_classif.predict(X_test)
+
+# Plot the confusion matrix
+conf_mat_fig = plt.figure(figsize=(6, 6))
+ax1 = conf_mat_fig.add_subplot(111)
+skplt.metrics.plot_confusion_matrix(Y_test, y_pred, ax=ax1, normalize=True)
+st.pyplot(conf_mat_fig, use_container_width=True)
 
 ## Dashboard
 st.title("Band Defects :red[Prediction] :bar_chart: :chart_with_upwards_trend:")
@@ -56,15 +97,15 @@ with tab1:
   # Summary of the table
   st.subheader("Summary")
   total_rows = len(df)
-  good_quality_count = (df["Defect"] == "Good_Product").sum()
-  welding_crack_count = (df["Defect"] == "Welding_Crack").sum()
+  good_quality_count = (df["iDefect"] == "Good_Product").sum()
+  welding_crack_count = (df["iDefect"] == "Welding_Crack").sum()
   st.write(f"Total data rows: {total_rows}")
   st.write(f"Predicted as Good Quality: {good_quality_count}")
   st.write(f"Predicted as Welding Crack Defects: {welding_crack_count}")
 
   # Bar chart
   st.subheader("Predictions")
-  prediction_counts = df["Defect"].value_counts()
+  prediction_counts = df["iDefect"].value_counts()
   st.bar_chart(prediction_counts)
 
 with tab2:
@@ -73,14 +114,14 @@ with tab2:
   with col1:
     conf_mat_fig = plt.figure(figsize=(6, 6))
     ax1 = conf_mat_fig.add_subplot(111)
-    skplt.metrics.plot_confusion_matrix(Y_test, Y_test_preds, ax=ax1, normalize=True)
+    skplt.metrics.plot_confusion_matrix(Y_test, y_pred, ax=ax1, normalize=True)
     st.pyplot(conf_mat_fig, use_container_width=True)
 
   with col2:
-    feat_imp_fig, ax2 = plt.subplots(figsize=(8, 6)) # Increase figsize for better visualization
+    feat_imp_fig, ax2 = plt.subplots(figsize=(8, 6))  # Increase figsize for better visualization
 
     # Calculate feature importances from the trained random forest classifier
-    feature_importances = rf_classif.feature_importances_
+    feature_importances = gbc_classif.feature_importances_
 
     # Get the top 10 feature importances and their corresponding feature names
     top_10_indices = np.argsort(feature_importances)[::-1][:10]
@@ -98,7 +139,7 @@ with tab2:
     st.pyplot(feat_imp_fig, use_container_width=True)
 
   # Metric for model accuracy
-  accuracy = accuracy_score(Y_test, Y_test_preds)
+  accuracy = accuracy_score(Y_test, y_pred)
   st.subheader("Model Accuracy")
   st.markdown("<h2 style='color: green;'>{:.2f}%</h2>".format(accuracy * 100), unsafe_allow_html=True)
 
@@ -106,7 +147,7 @@ with tab2:
   st.header(" Classification Report")
 
   # Get classification report as a string
-  report = classification_report(Y_test, Y_test_preds, output_dict=True)
+  report = classification_report(Y_test, y_pred, output_dict=True)
 
   # Create a DataFrame from the classification report
   report_df = pd.DataFrame(report).transpose()
@@ -132,8 +173,8 @@ with tab3:
 
     # Predict using the model (with data cleaning)
     new_data = new_df[feature_names].apply(lambda x: pd.to_numeric(x, errors='coerce'))
-    new_predictions = rf_classif.predict(new_data)
-    new_probs = rf_classif.predict_proba(new_data)
+    new_predictions = gbc_classif.predict(new_data)
+    new_probs = gbc_classif.predict_proba(new_data)
 
     # Convert prediction to human-readable labels
     new_df["Prediction"] = np.where(new_predictions == "Welding_Crack", "Welding Crack", "Good Product")
@@ -154,4 +195,11 @@ with tab3:
     st.write(new_df)
   else:
     st.write("Please upload a CSV file to make predictions.")
+
+
+
+
+
+
+
 
