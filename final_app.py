@@ -44,11 +44,11 @@ targets = data_with_targets["iDefect"]
 X_train, X_test, Y_train, Y_test = train_test_split(data.dropna(), targets, train_size=0.8, random_state=123)
 
 ## Load Model
-gbc_classif = load("Welding_crack_xgb.joblib")
+xgb_classif = load("Welding_crack_xgb.joblib")
 
 # Prediction with error handling (optional, data cleaning is preferred)
 try:
-  Y_test_preds = gbc_classif.predict(X_test)
+  Y_test_preds = xgb_classif.predict(X_test)
 except ValueError as e:
   if 'could not convert string to float' in str(e):
     print("Encountered string values during prediction. Consider data cleaning.")
@@ -65,9 +65,9 @@ for col in X_test.columns:
     X_test[col] = le.fit_transform(X_test[col])
 
 # Now predict using the cleaned data
-Y_test_preds = gbc_classif.predict(X_test)
+Y_test_preds = xgb_classif.predict(X_test)
 
-probability_predictions = gbc_classif.predict_proba(X_test)
+probability_predictions = xgb_classif.predict_proba(X_test)
 
 # Apply a threshold to convert probabilities to class labels
 threshold = 0.5
@@ -76,7 +76,7 @@ y_pred = np.where(probability_predictions[:, 1] > threshold, "Welding_Crack", "G
 # Assuming you have trained your model (rf_classif) and split data (X_test, Y_test)
 
 # Predict labels for test data
-Y_test_preds = gbc_classif.predict(X_test)
+Y_test_preds = xgb_classif.predict(X_test)
 
 # Plot the confusion matrix
 conf_mat_fig = plt.figure(figsize=(6, 6))
@@ -173,8 +173,8 @@ with tab3:
 
     # Predict using the model (with data cleaning)
     new_data = new_df[feature_names].apply(lambda x: pd.to_numeric(x, errors='coerce'))
-    new_predictions = gbc_classif.predict(new_data)
-    new_probs = gbc_classif.predict_proba(new_data)
+    new_predictions = xgb_classif.predict(new_data)
+    new_probs = xgb_classif.predict_proba(new_data)
 
     # Convert prediction to human-readable labels
     new_df["Prediction"] = np.where(new_predictions == "Welding_Crack", "Welding Crack", "Good Product")
