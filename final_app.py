@@ -44,7 +44,7 @@ targets = data_with_targets["iDefect"]
 X_train, X_test, Y_train, Y_test = train_test_split(data.dropna(), targets, train_size=0.8, random_state=123)
 
 ## Load Model
-gbc_classif = load("Welding_crack_gbc.joblib")
+gbc_classif = load("Welding_crack_xgb.joblib")
 
 # Prediction with error handling (optional, data cleaning is preferred)
 try:
