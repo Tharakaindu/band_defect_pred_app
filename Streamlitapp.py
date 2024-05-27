@@ -90,4 +90,50 @@ skplt.metrics.plot_confusion_matrix(Y_test, y_pred, ax=ax1, normalize=True)
 st.pyplot(conf_mat_fig, use_container_width=True)
 
 ## Dashboard
-st.title("Band Defects
+st.title("Band Defects")
+
+# User Input for Prediction
+st.subheader("Predict Band Defect")
+
+user_input = {}
+for feature_name in feature_names:
+  user_input[feature_name] = st.text_input(feature_name)
+
+user_data = pd.DataFrame([user_input])
+
+# Data Cleaning (optional, based on your requirements)
+# You might need to perform similar cleaning as in the model loading section
+
+# Prediction
+try:
+  user_prediction = xgb_classif.predict(user_data)[0]
+  prediction_proba = xgb_classif.predict_proba(user_data)[0][1] * 100
+except ValueError as e:
+  if 'could not convert string to float' in str(e):
+    st.warning("Encountered string values during prediction. Please enter numeric values or appropriate data for categorical features.")
+  else:
+    raise e  # Re-raise other ValueErrors
+
+# Display Prediction Results
+if 'user_prediction' in locals():
+  if user_prediction == "Welding_Crack":
+    st.error(f"The model predicts a **welding crack** with {prediction_proba:.2f}% probability.")
+  else:
+    st.success(f"The model predicts **no welding crack** with {prediction_proba:.2f}% probability.")
+
+# Feature Importance (optional)
+ explainer = lime_tabular.LimeTabularExplainer(
+     data=X_train,
+     feature_names=feature_names,
+     class_names=target_names,
+     random_state=1
+ )
+ 
+ exp = explainer.explain_instance(user_data.iloc[0], xgb_classif.predict_proba, num_features=5)
+
+ # Plot feature importances (optional)
+ if 'exp' in locals():
+   fig = exp.as_pyplot_figure(figsize=(10, 6))
+   st.pyplot(fig, use_container_width=True)
+
+
