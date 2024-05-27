@@ -139,7 +139,8 @@ if exp is not None:  # Check if explanation is available
   fig = exp.as_pyplot_figure(figsize=(10, 6))
   st.pyplot(fig, use_container_width=True)
 
- # Plot feature importances (optional)
- if 'exp' in locals():
-   fig = exp.as_pyplot_figure(figsize=(10, 6))
-   st.pyplot(fig, use_container_width=True)
+# ... (previous code)
+
+if 'exp' in locals():  # Reduced indentation for closing parenthesis
+  fig = exp.as_pyplot_figure(figsize=(10, 6))
+  st.pyplot(fig, use_container_width=True)
