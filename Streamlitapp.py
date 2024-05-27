@@ -51,9 +51,19 @@ except FileNotFoundError:
   st.error(f"Error: Trained model 'Welding_crack_xgb.joblib' not found. Please ensure the model file is uploaded or trained beforehand.")
   exit()
 
-# Prediction with error handling (optional, data cleaning is preferred)
+# Prediction with error handling and data cleaning (optional)
 try:
-  Y_test_preds = xgb_classif.predict(X_test)
+  # Data cleaning before prediction (optional)
+  # You can add specific data cleaning steps based on your data
+  X_test_cleaned = X_test.copy()  # Create a copy to avoid modifying original data
+  for col in X_test_cleaned.columns:
+    if X_test_cleaned[col].dtype == object:  # Check for string data type
+      # Consider encoding categorical features here (e.g., one-hot encoding)
+      # ...
+      pass
+
+  # Prediction on cleaned data
+  Y_test_preds = xgb_classif.predict(X_test_cleaned)
 except ValueError as e:
   if 'could not convert string to float' in str(e):
     st.warning("Encountered string values during prediction. Consider data cleaning (e.g., encoding categorical features).")
@@ -63,35 +73,7 @@ except ValueError as e:
 
 from sklearn.preprocessing import LabelEncoder
 
-# Identify and handle non-numeric features (replace with your approach)
-le = LabelEncoder()
-for col in X_test.columns:
-  if X_test[col].dtype == object:  # Check for string data type
-    X_test[col] = le.fit_transform(X_test[col])
-
-# Now predict using the cleaned data
-Y_test_preds = xgb_classif.predict(X_test)
-
-probability_predictions = xgb_classif.predict_proba(X_test)
-
-# Apply a threshold to convert probabilities to class labels
-threshold = 0.5
-y_pred = np.where(probability_predictions[:, 1] > threshold, "Welding_Crack", "Good")  # Assuming second column is positive class
-
-# Assuming you have trained your model (rf_classif) and split data (X_test, Y_test)
-
-# Predict labels for test data
-Y_test_preds = xgb_classif.predict(X_test)
-
-# Plot the confusion matrix
-conf_mat_fig = plt.figure(figsize=(6, 6))
-ax1 = conf_mat_fig.add_subplot(111)
-skplt.metrics.plot_confusion_matrix(Y_test, y_pred, ax=ax1, normalize=True)
-st.pyplot(conf_mat_fig, use_container_width=True)
-
-## Dashboard
-st.title("Band Defects")
-
+# ... (rest of your code for user input, feature importance, etc.)
 # User Input for Prediction
 st.subheader("Predict Band Defect")
 
@@ -101,13 +83,22 @@ for feature_name in feature_names:
 
 user_data = pd.DataFrame([user_input])
 
-# Data Cleaning (optional, based on your requirements)
+# Data Cleaning for User Input (optional)
 # You might need to perform similar cleaning as in the model loading section
 
 # Prediction
 try:
-  user_prediction = xgb_classif.predict(user_data)[0]
-  prediction_proba = xgb_classif.predict_proba(user_data)[0][1] * 100
+  # Data cleaning for user input (optional)
+  user_data_cleaned = user_data.copy()  # Create a copy to avoid modifying original data
+  for col in user_data_cleaned.columns:
+    if user_data_cleaned[col].dtype == object:  # Check for string data type
+      # Consider encoding categorical features here (e.g., one-hot encoding)
+      # ...
+      pass
+
+  # Prediction on cleaned user data
+  user_prediction = xgb_classif.predict(user_data_cleaned)[0]
+  prediction_proba = xgb_classif.predict_proba(user_data_cleaned)[0][1] * 100
 except ValueError as e:
   if 'could not convert string to float' in str(e):
     st.warning("Encountered string values during prediction. Please enter numeric values or appropriate data for categorical features.")
@@ -122,29 +113,16 @@ if 'user_prediction' in locals():
     st.success(f"The model predicts **no welding crack** with {prediction_proba:.2f}% probability.")
 
 # Feature Importance (optional)
-def some_function():
-  # Code within the function
-  explainer = lime_tabular.LimeTabularExplainer(
-      data=X_train,
-      feature_names=feature_names,
-      class_names=target_names,
-      random_state=1
-  )
+ explainer = lime_tabular.LimeTabularExplainer(
+     data=X_train,
+     feature_names=feature_names,
+     class_names=target_names,
+     random_state=1
+ )
+ 
+ exp = explainer.explain_instance(user_data_cleaned.iloc[0], xgb_classif.predict_proba, num_features=5)
 
-explainer = lime_tabular.LimeTabularExplainer(
-    data=X_train,
-    feature_names=feature_names,
-    class_names=target_names,
-    random_state=1
-)
-
-# Option 1: No following lines in the code block (remove indentation)
-exp = explainer.explain_instance(user_data.iloc[0], xgb_classif.predict_proba, num_features=5)
-
-# Option 2: Following lines processing the explanation (add indentation)
-exp = explainer.explain_instance(user_data.iloc[0], xgb_classif.predict_proba, num_features=5)
-if exp is not None:  # Check if explanation is available
-  fig = exp.as_pyplot_figure(figsize=(10, 6))
-  st.pyplot(fig, use_container_width=True)
-
-
+ # Plot feature importances (optional)
+ if 'exp' in locals():
+   fig = exp.as_pyplot_figure(figsize=(10, 6))
+   st.pyplot(fig, use_container_width=True)
