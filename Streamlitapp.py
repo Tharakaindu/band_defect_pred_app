@@ -122,8 +122,22 @@ explainer = lime_tabular.LimeTabularExplainer(
 # Additional lines defining explainer behavior (same indentation)
 if some_condition:
   explainer.set_feature_selection_threshold(0.2)
- 
- exp = explainer.explain_instance(user_data_cleaned.iloc[0], xgb_classif.predict_proba, num_features=5)
+
+explainer = lime_tabular.LimeTabularExplainer(
+    data=X_train,
+    feature_names=feature_names,
+    class_names=target_names,
+    random_state=1
+)
+
+# Option 1: No following lines in the code block (remove indentation)
+exp = explainer.explain_instance(user_data_cleaned.iloc[0], xgb_classif.predict_proba, num_features=5)
+
+# Option 2: Following lines processing the explanation (add indentation)
+exp = explainer.explain_instance(user_data_cleaned.iloc[0], xgb_classif.predict_proba, num_features=5)
+if exp is not None:  # Check if explanation is available
+  fig = exp.as_pyplot_figure(figsize=(10, 6))
+  st.pyplot(fig, use_container_width=True)
 
  # Plot feature importances (optional)
  if 'exp' in locals():
