@@ -112,13 +112,16 @@ if 'user_prediction' in locals():
   else:
     st.success(f"The model predicts **no welding crack** with {prediction_proba:.2f}% probability.")
 
-# Feature Importance (optional)
- explainer = lime_tabular.LimeTabularExplainer(
-     data=X_train,
-     feature_names=feature_names,
-     class_names=target_names,
-     random_state=1
- )
+explainer = lime_tabular.LimeTabularExplainer(
+    data=X_train,
+    feature_names=feature_names,
+    class_names=target_names,
+    random_state=1
+)
+
+# Additional lines defining explainer behavior (same indentation)
+if some_condition:
+  explainer.set_feature_selection_threshold(0.2)
  
  exp = explainer.explain_instance(user_data_cleaned.iloc[0], xgb_classif.predict_proba, num_features=5)
 
