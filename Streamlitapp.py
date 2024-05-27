@@ -71,6 +71,12 @@ except ValueError as e:
   else:
     raise e  # Re-raise other ValueErrors
 
+try:
+    Y_test_preds = xgb_classif.predict(X_test_cleaned)
+except ValueError as e:
+    # Handle the error here (e.g., print specific error message, provide informative feedback to user)
+    raise e  # Re-raise the error for further debugging (optional)
+
 from sklearn.preprocessing import LabelEncoder
 
 # ... (rest of your code for user input, feature importance, etc.)
