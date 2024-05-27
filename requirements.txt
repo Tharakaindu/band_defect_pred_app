@@ -6,3 +6,4 @@ scikit-plot
 uv
 streamlit
 joblib
+xgboost
