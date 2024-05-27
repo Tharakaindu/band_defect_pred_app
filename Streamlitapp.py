@@ -130,12 +130,21 @@ def some_function():
       class_names=target_names,
       random_state=1
   )
- 
- exp = explainer.explain_instance(user_data.iloc[0], xgb_classif.predict_proba, num_features=5)
 
- # Plot feature importances (optional)
- if 'exp' in locals():
-   fig = exp.as_pyplot_figure(figsize=(10, 6))
-   st.pyplot(fig, use_container_width=True)
+explainer = lime_tabular.LimeTabularExplainer(
+    data=X_train,
+    feature_names=feature_names,
+    class_names=target_names,
+    random_state=1
+)
+
+# Option 1: No following lines in the code block (remove indentation)
+exp = explainer.explain_instance(user_data.iloc[0], xgb_classif.predict_proba, num_features=5)
+
+# Option 2: Following lines processing the explanation (add indentation)
+exp = explainer.explain_instance(user_data.iloc[0], xgb_classif.predict_proba, num_features=5)
+if exp is not None:  # Check if explanation is available
+  fig = exp.as_pyplot_figure(figsize=(10, 6))
+  st.pyplot(fig, use_container_width=True)
 
 
